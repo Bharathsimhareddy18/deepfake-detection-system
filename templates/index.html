@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main-container">
+    <!-- Header Section -->
+    <header class="header">
+        <div class="header-content">
+            <div class="profile-section">
+                <div class="profile-image">
+                    <img src="{{ url_for('static', filename='images/profile.jpg') }}" alt="Bharath Simha Reddy" />
+                </div>
+                <div class="profile-info">
+                    <h1 class="name">Bharath Simha Reddy</h1>
+                    <p class="title">AI/ML Developer</p>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <a href="/download_cv" class="btn btn-secondary" id="downloadCV">
+                    <i class="fas fa-download"></i>
+                    Download CV
+                </a>
+                
+                <div class="social-links">
+                    <a href="https://www.linkedin.com/in/bharath-simha-reddy-bhureddy-b988092b0" target="_blank" class="social-btn linkedin">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://x.com/imBbharath18" target="_blank" class="social-btn x-twitter">
+                        <span class="x-logo">𝕏</span>
+                    </a>
+                    <a href="https://github.com/Bharathsimhareddy18" target="_blank" class="social-btn github">
+                        <i class="fab fa-github"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="hero-text">
+                <h2 class="hero-title">AI-Powered Deepfake Detection</h2>
+                <p class="hero-subtitle">Upload an image to analyze whether it's real or artificially generated using advanced machine learning technology.</p>
+            </div>
+        </div>
+
+        <!-- UPLOAD SECTION -->
+        <div class="upload-section-wrapper" id="uploadSectionWrapper">
+            <h2 class="upload-section-title">Upload Your Image</h2>
+            <div class="upload-container" id="uploadContainer">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <h3>Drag & Drop Image Here</h3>
+                    <p>or <span class="browse-link">click to select file</span></p>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+                <div class="upload-info">
+                    <p><strong>Supported:</strong> JPG, PNG, GIF, BMP | <strong>Max:</strong> 16MB</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Section - CENTERED -->
+        <div class="loading-section-wrapper" id="loadingSectionWrapper" style="display: none;">
+            <div class="loading-section" id="loadingSection">
+                <div class="spinner"></div>
+                <h3>Analyzing Image...</h3>
+                <p>Please wait while our AI processes your image</p>
+            </div>
+        </div>
+
+        <!-- Results Section - CENTERED -->
+        <div class="results-section-wrapper" id="resultsSectionWrapper" style="display: none;">
+            <div class="results-section" id="resultsSection">
+                <h2 class="section-title">Analysis Results</h2>
+                <div class="result-container">
+                    <div class="image-preview">
+                        <img id="analyzedImage" src="" alt="Analyzed Image" />
+                    </div>
+                    
+                    <div class="result-info">
+                        <h3>Analysis Complete</h3>
+                        <div class="result-label">
+                            <span class="label-text" id="resultLabel">Real</span>
+                            <span class="confidence-badge" id="confidenceBadge">95.2%</span>
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="confidence-progress" id="confidenceProgress"></div>
+                        </div>
+                        <p class="result-description" id="resultDescription">
+                            This image appears to be authentic based on our analysis.
+                        </p>
+                        <button class="btn btn-primary" id="analyzeAnother">
+                            <i class="fas fa-redo"></i>
+                            Analyze Another Image
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Information Section - ONLY SHOW WHEN NOT ANALYZING -->
+        <div class="model-info-section" id="modelInfoSection">
+            <div class="model-info-container">
+                <div class="model-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">85%</div>
+                        <div class="stat-label">Model Accuracy</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">190K+</div>
+                        <div class="stat-label">Training Images</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">MobileNet</div>
+                        <div class="stat-label">Transfer Learning</div>
+                    </div>
+                </div>
+                <div class="model-description">
+                    <h3>About Our Model</h3>
+                    <p>Our deepfake detection system is built using MobileNet architecture with transfer learning techniques. The model has been trained on over 190,000 diverse images and achieves an accuracy of 85% in distinguishing between real and artificially generated content.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Bharath Simha Reddy. Built with AI and passion.</p>
+    </footer>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded - initializing upload');
+    
+    // Get elements
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const uploadSectionWrapper = document.getElementById('uploadSectionWrapper');
+    const loadingSectionWrapper = document.getElementById('loadingSectionWrapper');
+    const resultsSectionWrapper = document.getElementById('resultsSectionWrapper');
+    const modelInfoSection = document.getElementById('modelInfoSection');
+    
+    console.log('Upload area found:', uploadArea);
+    
+    // Click to upload
+    uploadArea.addEventListener('click', function() {
+        console.log('Upload area clicked');
+        fileInput.click();
+    });
+    
+    // File selection
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files[0]) {
+            console.log('File selected:', e.target.files[0].name);
+            handleFile(e.target.files[0]);
+        }
+    });
+    
+    // Drag events
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('drag-over');
+        console.log('Drag over');
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            console.log('File dropped:', files[0].name);
+            handleFile(files[0]);
+        }
+    });
+    
+    // Handle file
+    function handleFile(file) {
+        // Validate
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Please upload a valid image file');
+            return;
+        }
+        
+        if (file.size > 16 * 1024 * 1024) {
+            alert('File too large. Max 16MB');
+            return;
+        }
+        
+        // Show loading and hide other sections
+        showLoadingState();
+        
+        // Upload
+        uploadFile(file);
+    }
+    
+    function showLoadingState() {
+        uploadSectionWrapper.style.display = 'none';
+        modelInfoSection.style.display = 'none';
+        resultsSectionWrapper.style.display = 'none';
+        loadingSectionWrapper.style.display = 'flex';
+        
+        // Scroll to loading section
+        loadingSectionWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    function showResultsState() {
+        uploadSectionWrapper.style.display = 'none';
+        modelInfoSection.style.display = 'none';
+        loadingSectionWrapper.style.display = 'none';
+        resultsSectionWrapper.style.display = 'flex';
+        
+        // Scroll to results section
+        resultsSectionWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    function showUploadState() {
+        uploadSectionWrapper.style.display = 'block';
+        modelInfoSection.style.display = 'block';
+        loadingSectionWrapper.style.display = 'none';
+        resultsSectionWrapper.style.display = 'none';
+        
+        // Scroll to upload section
+        uploadSectionWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // Upload file
+    async function uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            console.log('Result:', result);
+            
+            if (result.success) {
+                showResults(result);
+            } else {
+                showError(result.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showError('Network error');
+        }
+    }
+    
+    // Show results
+    function showResults(result) {
+        document.getElementById('analyzedImage').src = result.image_url;
+        document.getElementById('resultLabel').textContent = result.label;
+        document.getElementById('confidenceBadge').textContent = result.confidence;
+        
+        const progressElement = document.getElementById('confidenceProgress');
+        setTimeout(() => {
+            progressElement.style.width = (result.confidence_score * 100) + '%';
+        }, 500);
+        
+        // Set colors
+        const labelElement = document.getElementById('resultLabel');
+        const badgeElement = document.getElementById('confidenceBadge');
+        
+        if (result.label === 'Real') {
+            labelElement.className = 'label-text real';
+            badgeElement.className = 'confidence-badge real';
+            progressElement.className = 'confidence-progress real';
+            document.getElementById('resultDescription').textContent = 'This image appears to be authentic based on our AI analysis.';
+        } else {
+            labelElement.className = 'label-text deepfake';
+            badgeElement.className = 'confidence-badge deepfake';
+            progressElement.className = 'confidence-progress deepfake';
+            document.getElementById('resultDescription').textContent = 'This image appears to be artificially generated or manipulated.';
+        }
+        
+        showResultsState();
+    }
+    
+    // Show error
+    function showError(message) {
+        showUploadState();
+        alert(message);
+    }
+    
+    // Reset
+    document.getElementById('analyzeAnother').addEventListener('click', function() {
+        fileInput.value = '';
+        showUploadState();
+    });
+});
+</script>
+{% endblock %}
